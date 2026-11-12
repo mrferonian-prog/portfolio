@@ -254,3 +254,17 @@ footer{padding-bottom:clamp(24px,4vw,56px)}
 .hero-copy .hello{width:0;min-width:100%;max-width:none}
 
 .f-open{justify-self:start;margin-bottom:28px;position:relative;z-index:2}
+
+/* мобильная галерея: листание свайпом */
+.gal-count{display:none}
+@media (max-width:700px){
+  .gal{display:flex!important;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-inline:calc(var(--m,16px) * -1);padding-inline:var(--m,16px);scroll-padding-inline:var(--m,16px)}
+  .gal::-webkit-scrollbar{display:none}
+  .gal button,.gal button:first-child,.gal button:last-child:nth-child(even){flex:0 0 88%;scroll-snap-align:start;grid-column:auto}
+  .gal img,.gal button:first-child img,.gal button:last-child:nth-child(even) img{aspect-ratio:4/3;height:auto;max-height:none;object-fit:contain;background:var(--card)}
+  .gal button:hover img{transform:none}
+  .gal-count{display:block;margin-top:14px;text-align:center}
+  .gal [data-r]{opacity:1!important;transform:none!important}
+  .lb{touch-action:pan-y pinch-zoom}
+  .lb img{will-change:transform}
+}

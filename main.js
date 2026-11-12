@@ -39,8 +39,8 @@
     fill('#project', `<section class="p-hero"><div class="bgimg tone"><img ${SITE.imgAttrs(p.images[0], '100vw', 1920)} alt="${esc(p.title)}" fetchpriority="high" width="1600" height="1200"></div>
       <div class="in"><h1 class="sr-only">${esc(p.title)}</h1><div class="p-body"><p class="lead">${esc(p.short)}</p><div>${p.text.map(t => `<p>${esc(t)}</p>`).join('')}</div></div>
       <div class="figs p-figs">${p.facts.map(f => `<div><b>${esc(f[1])}</b><span class="small">${esc(f[0])}</span></div>`).join('')}</div></div></section>
-      <section><div class="head"><h2 class="h">Галерея <em>проекта</em></h2><span class="small">${p.images.length} изображений</span></div>
-      <div class="gal">${p.images.map((s, j) => `<button class="cut" type="button" data-i="${j}" data-r aria-label="Открыть изображение ${j + 1}"><img ${SITE.imgAttrs(s, '(max-width:900px) 92vw, 60vw')} alt="${esc(p.title)}, изображение ${j + 1}" loading="lazy" decoding="async" width="1600" height="1200"></button>`).join('')}</div>
+      <section><div class="head"><h2 class="h">Галерея <em>проекта</em></h2><span class="small">${p.images.length} ${((n) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? 'изображение' : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) ? 'изображения' : 'изображений'; })(p.images.length)}</span></div>
+      <div class="gal">${p.images.map((s, j) => `<button class="cut" type="button" data-i="${j}" data-r aria-label="Открыть изображение ${j + 1}"><img ${SITE.imgAttrs(s, '(max-width:900px) 92vw, 60vw')} alt="${esc(p.title)}, изображение ${j + 1}" loading="lazy" decoding="async" width="1600" height="1200"></button>`).join('')}</div><p class="gal-count small" aria-hidden="true"></p>
       <a class="next" href="${url(n)}" data-r><span><span class="small">Следующий проект</span><b>${esc(n.title)}</b></span><span class="btn" style="padding:0 10px"><span>${AR}</span></span></a></section>
       <div class="lb" role="dialog" aria-modal="true" aria-label="Просмотр изображений"><div class="lbimg"><img alt=""></div><div class="lb-bar"><button class="pill" type="button" data-d="-1">Назад</button><button class="pill" type="button" data-d="1">Далее</button><button class="pill" type="button" data-close>Закрыть</button></div></div>`);
     const lb = document.querySelector('.lb'), im = lb.querySelector('img'); let cur = 0, op;
@@ -48,6 +48,17 @@
     const close = () => { lb.classList.remove('open'); op && op.focus(); };
     document.querySelector('.gal').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; op = b; show(+b.dataset.i); lb.classList.add('open'); lb.querySelector('[data-close]').focus(); });
     lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('[data-close]')) close(); const d = e.target.closest('[data-d]'); if (d) show(cur + +d.dataset.d); });
+    // свайп в просмотрщике: влево/вправо — листать, вниз — закрыть
+    let tx = null, ty = 0, dx = 0, dy = 0;
+    lb.addEventListener('touchstart', e => { if (e.touches.length !== 1) return; tx = e.touches[0].clientX; ty = e.touches[0].clientY; dx = dy = 0; im.style.transition = 'none'; }, { passive: true });
+    lb.addEventListener('touchmove', e => { if (tx === null) return; dx = e.touches[0].clientX - tx; dy = e.touches[0].clientY - ty;
+      if (Math.abs(dx) > Math.abs(dy)) im.style.transform = `translateX(${dx}px)`; else if (dy > 0) { im.style.transform = `translateY(${dy}px)`; im.style.opacity = String(Math.max(.3, 1 - dy / 400)); } }, { passive: true });
+    lb.addEventListener('touchend', () => { if (tx === null) return; tx = null;
+      im.style.transition = 'transform .3s var(--ease), opacity .3s'; im.style.transform = ''; im.style.opacity = '';
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) show(cur + (dx < 0 ? 1 : -1)); else if (dy > 90 && dy > Math.abs(dx)) close(); });
+    // мобильная галерея-карусель: счётчик кадров
+    const gal = document.querySelector('.gal'), cnt = document.querySelector('.gal-count');
+    if (gal && cnt) { const upd = () => { const w = gal.firstElementChild ? gal.firstElementChild.getBoundingClientRect().width : 1; cnt.textContent = `${Math.min(p.images.length, Math.round(gal.scrollLeft / (w + 12)) + 1)} / ${p.images.length}`; }; gal.addEventListener('scroll', upd, { passive: true }); upd(); }
     addEventListener('keydown', e => { if (!lb.classList.contains('open')) return; if (e.key === 'Escape') close(); if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1); });
   }
   reveal();
