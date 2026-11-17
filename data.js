@@ -306,7 +306,10 @@ window.PORTFOLIO = {
         "img/ipf-brochure-6.jpg",
         "img/ipf-brochure-7.jpg"
       ],
-      "card": "img/ipf-brochure-card.jpg"
+      "card": "img/ipf-brochure-card.jpg",
+      "tags": [
+        "Айдентика"
+      ]
     },
     {
       "slug": "metelica",
