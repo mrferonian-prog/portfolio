@@ -1,5 +1,6 @@
 (function () {
   const { P, esc, reveal, url, project, param, next, fill } = window.SITE;
+  const tagsOf = p => [p.type, ...(p.tags || [])];
   const AR = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 11 11 1M3 1h8v8"/></svg>';
   const pad = n => String(n).padStart(2, '0');
 
@@ -17,7 +18,7 @@
   const upChk = () => up.classList.toggle('show', scrollY > innerHeight * 0.85); addEventListener('scroll', upChk, { passive: true }); addEventListener('resize', upChk); upChk();
 
   const work = (p, i, big) => `<a class="work" href="${url(p)}" data-r style="--d:${(i % 3) * .1}s"><div class="cut"><img ${SITE.imgAttrs(p.card || p.images[0], big ? '(max-width:1000px) 92vw, 62vw' : '(max-width:700px) 92vw, 46vw')} alt="${esc(p.title)}" loading="lazy" decoding="async" width="1600" height="1200"></div>
-    <div class="tx"><div class="row"><h3>${esc(p.title)}</h3><span class="small">${p.year}</span></div><span class="tag">${esc(p.type)}</span><p>${esc(p.short)}</p></div></a>`;
+    <div class="tx"><div class="row"><h3>${esc(p.title)}</h3><span class="small">${p.year}</span></div><span class="tags">${tagsOf(p).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</span><p>${esc(p.short)}</p></div></a>`;
   const page = document.body.dataset.page;
   if (page === 'home') {
     fill('#hello', esc(P.hello));
@@ -26,9 +27,9 @@
     fill('#skills', P.skills.map((s, i) => `<div class="skill cut${i === 0 ? ' wide' : ''}" data-r style="--d:${i * .1}s"><h3 class="small">${esc(s.group)}</h3><ul class="slist"${i === 0 ? ` style="--rows:${Math.ceil(s.items.length / 2)}"` : ''}>${s.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join(''));
   }
   if (page === 'projects') {
-    const types = ['Все', ...new Set(P.projects.map(p => p.type))];
+    const types = ['Все', ...new Set(P.projects.flatMap(tagsOf))];
     const grid = document.getElementById('all');
-    const draw = t => { const l = P.projects.filter(p => t === 'Все' || p.type === t); grid.innerHTML = l.length ? l.map((p, i) => work(p, i, true)).join('') : '<p class="small">Здесь пока пусто.</p>'; reveal(grid); };
+    const draw = t => { const l = P.projects.filter(p => t === 'Все' || tagsOf(p).includes(t)); grid.innerHTML = l.length ? l.map((p, i) => work(p, i, true)).join('') : '<p class="small">Здесь пока пусто.</p>'; reveal(grid); };
     fill('#filters', types.map((t, i) => `<button class="tag" type="button" aria-pressed="${i === 0}">${esc(t)}</button>`).join(''));
     document.getElementById('filters').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; document.querySelectorAll('#filters button').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(b.textContent); });
     draw('Все');

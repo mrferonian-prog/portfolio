@@ -268,3 +268,5 @@ footer{padding-bottom:clamp(24px,4vw,56px)}
   .lb{touch-action:pan-y pinch-zoom}
   .lb img{will-change:transform}
 }
+
+.work .tags{display:flex;flex-wrap:wrap;gap:8px}
